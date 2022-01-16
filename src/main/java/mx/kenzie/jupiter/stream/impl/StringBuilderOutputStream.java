@@ -10,12 +10,22 @@ public class StringBuilderOutputStream extends OutputStream {
     private static final int GROW = 16;
     
     protected final StringBuilder builder;
+    protected final Charset charset;
     protected volatile int mark;
-    protected byte[] bytes;
+    protected volatile byte[] bytes;
     
     public StringBuilderOutputStream(StringBuilder builder) {
+        this(builder, Charset.defaultCharset());
+    }
+    
+    public StringBuilderOutputStream(StringBuilder builder, Charset charset) {
+        this(builder, charset, GROW);
+    }
+    
+    public StringBuilderOutputStream(StringBuilder builder, Charset charset, int initialSize) {
         this.builder = builder;
-        this.bytes = new byte[GROW];
+        this.bytes = new byte[initialSize];
+        this.charset = charset;
     }
     
     @Override
@@ -23,7 +33,7 @@ public class StringBuilderOutputStream extends OutputStream {
         return new String(completed());
     }
     
-    protected byte[] completed() {
+    protected synchronized byte[] completed() {
         return Arrays.copyOf(bytes, mark);
     }
     
@@ -32,18 +42,18 @@ public class StringBuilderOutputStream extends OutputStream {
     }
     
     @Override
-    public synchronized void write(int x) throws IOException {
+    public synchronized void write(int x) {
         if (mark >= bytes.length) this.grow();
         this.bytes[mark++] = (byte) x;
     }
     
-    protected void grow() {
-        bytes = Arrays.copyOf(bytes, bytes.length + GROW);
+    protected synchronized void grow() {
+        this.bytes = Arrays.copyOf(bytes, bytes.length + GROW);
     }
     
     @Override
     public void close() throws IOException {
-        builder.append(this);
+        this.builder.append(this);
         super.close();
     }
     
