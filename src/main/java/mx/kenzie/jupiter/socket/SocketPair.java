@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+@SuppressWarnings("unused")
 public class SocketPair extends Thread implements AutoCloseable {
     
     protected final Object lock = new Object();
@@ -14,7 +15,6 @@ public class SocketPair extends Thread implements AutoCloseable {
     protected SocketOpeningProcess process;
     
     protected SocketPair() {
-    
     }
     
     public static Builder host(int port) {

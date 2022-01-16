@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+@SuppressWarnings("unused")
 public class SplitStream extends OutputStream implements Stream {
     
     protected static final byte GROW_SIZE = 8;

@@ -10,12 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class SocketHub extends Thread implements AutoCloseable {
     
-    public static final byte
-        JOIN = 1,
-        FAIL = 2,
-        LEAVE = 3;
     private static final ByteBuffer BUFFER = ByteBuffer.allocate(4);
     protected final ServerSocket central;
     protected final List<Socket> list = Collections.synchronizedList(new ArrayList<>());

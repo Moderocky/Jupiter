@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings("unused")
 public class InputStreamController extends InputStream implements StreamController {
     
     protected final InputStream stream;

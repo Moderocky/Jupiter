@@ -17,4 +17,12 @@ public interface Stream extends AutoCloseable {
         return new SplitStream(streams);
     }
     
+    static InputStream synchronize(InputStream stream) {
+        return new SynchronizedInputStream(stream);
+    }
+    
+    static OutputStream synchronize(OutputStream stream) {
+        return new SynchronizedOutputStream(stream);
+    }
+    
 }

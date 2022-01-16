@@ -1,6 +1,8 @@
 package mx.kenzie.jupiter.test;
 
 import mx.kenzie.jupiter.stream.Stream;
+import mx.kenzie.jupiter.stream.impl.ByteBufferOutputStream;
+import mx.kenzie.jupiter.stream.impl.NoThrowsOutputStream;
 import mx.kenzie.jupiter.stream.impl.StringBuilderOutputStream;
 import org.junit.Test;
 
@@ -8,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class StreamTest {
     
@@ -50,6 +53,22 @@ public class StreamTest {
         }
         assert builder.toString().equals("hello there");
         assert second.toString().equals("hello there");
+    }
+    
+    @Test
+    public void buffer() {
+        final ByteBuffer buffer = ByteBuffer.allocate(16);
+        try (final NoThrowsOutputStream stream = new ByteBufferOutputStream(buffer)) {
+            stream.write(10);
+            stream.write(40);
+            stream.write(22);
+            stream.write(new byte[]{2, 43});
+        }
+        assert buffer.get(0) == 10;
+        assert buffer.get(1) == 40;
+        assert buffer.get(2) == 22;
+        assert buffer.get(3) == 2;
+        assert buffer.get(4) == 43;
     }
     
 }

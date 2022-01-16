@@ -1,11 +1,12 @@
 package mx.kenzie.jupiter.stream.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-public class StringBuilderOutputStream extends OutputStream {
+@SuppressWarnings("unused")
+public class StringBuilderOutputStream extends NoThrowsOutputStream {
     
     private static final int GROW = 16;
     
@@ -37,7 +38,11 @@ public class StringBuilderOutputStream extends OutputStream {
         return Arrays.copyOf(bytes, mark);
     }
     
-    public void write(String string, Charset charset) throws IOException {
+    public void write(String string) {
+        this.write(string, charset);
+    }
+    
+    public void write(String string, Charset charset) {
         this.write(string.getBytes(charset));
     }
     
@@ -47,14 +52,25 @@ public class StringBuilderOutputStream extends OutputStream {
         this.bytes[mark++] = (byte) x;
     }
     
-    protected synchronized void grow() {
-        this.bytes = Arrays.copyOf(bytes, bytes.length + GROW);
+    @Override
+    public void write(byte @NotNull [] bytes) {
+        this.write(bytes, 0, bytes.length);
     }
     
     @Override
-    public void close() throws IOException {
+    public void write(byte @NotNull [] bytes, int offset, int length) {
+        for (int i = 0; i < length; i++) {
+            this.write(bytes[offset + i]);
+        }
+    }
+    
+    @Override
+    public void close() {
         this.builder.append(this);
-        super.close();
+    }
+    
+    protected synchronized void grow() {
+        this.bytes = Arrays.copyOf(bytes, bytes.length + GROW);
     }
     
 }
