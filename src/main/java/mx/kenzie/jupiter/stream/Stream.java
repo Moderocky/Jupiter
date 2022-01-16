@@ -7,5 +7,5 @@ public interface Stream extends AutoCloseable {
     static SplitStream split(OutputStream... streams) {
         return new SplitStream(streams);
     }
-
+    
 }

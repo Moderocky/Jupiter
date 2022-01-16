@@ -16,64 +16,40 @@ public class SocketHub extends Thread implements AutoCloseable {
         JOIN = 1,
         FAIL = 2,
         LEAVE = 3;
-    
+    private static final ByteBuffer BUFFER = ByteBuffer.allocate(4);
     protected final ServerSocket central;
     protected final List<Socket> list = Collections.synchronizedList(new ArrayList<>());
+    protected SocketOpeningProcess process;
     
     public SocketHub(int port) throws IOException {
-        this(new ServerSocket(), InetAddress.getLocalHost(), port);
+        this(new ServerSocket(), InetAddress.getLocalHost(), port, null);
     }
     
-    public SocketHub(InetAddress address, int port) throws IOException {
-        this(new ServerSocket(), address, port);
-    }
-    
-    protected SocketHub(ServerSocket central, InetAddress address, int port) throws IOException {
+    protected SocketHub(ServerSocket central, InetAddress address, int port, SocketOpeningProcess process) throws IOException {
         this.central = central;
         this.central.bind(new InetSocketAddress(address, port));
+        this.process = process;
         this.start();
     }
     
-    public int getPort() {
-        return central.getLocalPort();
+    public SocketHub(int port, SocketOpeningProcess process) throws IOException {
+        this(new ServerSocket(), InetAddress.getLocalHost(), port, process);
     }
     
-    public InetAddress getAddress() {
-        return central.getInetAddress();
+    public SocketHub(InetAddress address, int port) throws IOException {
+        this(new ServerSocket(), address, port, null);
+    }
+    
+    public SocketHub(InetAddress address, int port, SocketOpeningProcess process) throws IOException {
+        this(new ServerSocket(), address, port, process);
     }
     
     public static Socket connect(InetAddress address, int port) throws IOException {
-        try (final Socket linker = new Socket()) {
-            linker.connect(new InetSocketAddress(address, port));
-            linker.setKeepAlive(true);
-            return linker;
-        }
+        final Socket linker = new Socket();
+        linker.connect(new InetSocketAddress(address, port));
+        linker.setKeepAlive(true);
+        return linker;
     }
-    
-    @Override
-    public void run() {
-        try {
-            while (true) {
-                final Socket socket = central.accept();
-                this.list.add(socket);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-    
-    @Override
-    public void close() throws IOException {
-        try {
-            this.stop();
-        } catch (ThreadDeath ignored) {}
-        this.central.close();
-        for (final Socket socket : list) {
-            socket.close();
-        }
-    }
-    
-    private static final ByteBuffer BUFFER = ByteBuffer.allocate(4);
     
     private static byte[] convert(int port) {
         synchronized (BUFFER) {
@@ -86,6 +62,40 @@ public class SocketHub extends Thread implements AutoCloseable {
         synchronized (BUFFER) {
             BUFFER.put(port);
             return BUFFER.getInt();
+        }
+    }
+    
+    public boolean isClosed() {
+        return central.isClosed();
+    }
+    
+    public int getPort() {
+        return central.getLocalPort();
+    }
+    
+    public InetAddress getAddress() {
+        return central.getInetAddress();
+    }
+    
+    @Override
+    public void run() {
+        while (!central.isClosed()) {
+            try {
+                synchronized (central) {
+                    final Socket socket = central.accept();
+                    this.list.add(socket);
+                    if (process != null) process.open(socket);
+                }
+            } catch (IOException ignore) {
+            }
+        }
+    }
+    
+    @Override
+    public void close() throws IOException {
+        this.central.close();
+        for (final Socket socket : list) {
+            socket.close();
         }
     }
     
