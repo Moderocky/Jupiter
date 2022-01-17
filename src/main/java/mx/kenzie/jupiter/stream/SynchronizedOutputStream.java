@@ -14,6 +14,13 @@ class SynchronizedOutputStream extends OutputStream {
     }
     
     @Override
+    public void write(int b) throws IOException {
+        synchronized (stream) {
+            stream.write(b);
+        }
+    }
+    
+    @Override
     public void write(byte @NotNull [] bytes) throws IOException {
         synchronized (stream) {
             super.write(bytes);
@@ -31,13 +38,6 @@ class SynchronizedOutputStream extends OutputStream {
     public void flush() throws IOException {
         synchronized (stream) {
             stream.flush();
-        }
-    }
-    
-    @Override
-    public void write(int b) throws IOException {
-        synchronized (stream) {
-            stream.write(b);
         }
     }
     

@@ -25,4 +25,12 @@ public interface Stream extends AutoCloseable {
         return new SynchronizedOutputStream(stream);
     }
     
+    static InputStream keepalive(InputStream stream) {
+        return new NoCloseInputStream(stream);
+    }
+    
+    static OutputStream keepalive(OutputStream stream) {
+        return new NoCloseOutputStream(stream);
+    }
+    
 }
