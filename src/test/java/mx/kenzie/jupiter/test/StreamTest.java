@@ -1,5 +1,7 @@
 package mx.kenzie.jupiter.test;
 
+import mx.kenzie.jupiter.stream.InputStreamController;
+import mx.kenzie.jupiter.stream.OutputStreamController;
 import mx.kenzie.jupiter.stream.Stream;
 import mx.kenzie.jupiter.stream.impl.ByteBufferOutputStream;
 import mx.kenzie.jupiter.stream.impl.NoThrowsOutputStream;
@@ -80,6 +82,22 @@ public class StreamTest {
         assert bytes[0] == 10;
         assert bytes[1] == 20;
         assert bytes[2] == 30;
+    }
+    
+    @Test
+    public void controller() throws IOException {
+        final ByteArrayOutputStream original = new ByteArrayOutputStream();
+        try (final OutputStreamController stream = Stream.controller(original)) {
+            stream.write(10);
+            stream.write(20);
+            stream.writeLong(1000000);
+        }
+        final ByteArrayInputStream target = new ByteArrayInputStream(original.toByteArray());
+        try (final InputStreamController stream = Stream.controller(target)) {
+            assert stream.read() == 10;
+            assert stream.read() == 20;
+            assert stream.readLong() == 1000000;
+        }
     }
     
 }
