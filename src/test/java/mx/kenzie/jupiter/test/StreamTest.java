@@ -6,10 +6,7 @@ import mx.kenzie.jupiter.stream.impl.NoThrowsOutputStream;
 import mx.kenzie.jupiter.stream.impl.StringBuilderOutputStream;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 
 public class StreamTest {
@@ -69,6 +66,20 @@ public class StreamTest {
         assert buffer.get(2) == 22;
         assert buffer.get(3) == 2;
         assert buffer.get(4) == 43;
+    }
+    
+    @Test
+    public void preventClose() throws IOException {
+        final ByteArrayOutputStream original = new ByteArrayOutputStream();
+        try (final OutputStream stream = Stream.keepalive(original)) {
+            stream.write(10);
+            stream.write(20);
+        }
+        original.write(30);
+        final byte[] bytes = original.toByteArray();
+        assert bytes[0] == 10;
+        assert bytes[1] == 20;
+        assert bytes[2] == 30;
     }
     
 }
