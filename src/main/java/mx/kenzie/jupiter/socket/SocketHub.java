@@ -1,5 +1,7 @@
 package mx.kenzie.jupiter.socket;
 
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -24,7 +26,7 @@ public class SocketHub extends Thread implements AutoCloseable {
     
     protected SocketHub(ServerSocket central, InetAddress address, int port, SocketOpeningProcess process) throws IOException {
         this.central = central;
-        this.central.bind(new InetSocketAddress(address, port));
+        if (!central.isBound()) this.central.bind(new InetSocketAddress(address, port));
         this.process = process;
         this.start();
     }
@@ -41,11 +43,27 @@ public class SocketHub extends Thread implements AutoCloseable {
         this(new ServerSocket(), address, port, process);
     }
     
-    public static Socket connect(InetAddress address, int port) throws IOException {
-        final Socket linker = new Socket();
+    public static SocketHub create(InetAddress address, int port, SocketOpeningProcess process) throws IOException {
+        return new SocketHub(address, port, process);
+    }
+    
+    public static SocketHub createSecure(int port, SocketOpeningProcess process) throws IOException {
+        final ServerSocket socket = SSLServerSocketFactory.getDefault().createServerSocket(port, 50);
+        return new SocketHub(socket, socket.getInetAddress(), port, process);
+    }
+    
+    public static Socket connectSecure(InetAddress address, int port) throws IOException {
+        return connect(SSLSocketFactory.getDefault().createSocket(), address, port);
+    }
+    
+    public static Socket connect(Socket linker, InetAddress address, int port) throws IOException {
         linker.connect(new InetSocketAddress(address, port));
         linker.setKeepAlive(true);
         return linker;
+    }
+    
+    public static Socket connect(InetAddress address, int port) throws IOException {
+        return connect(new Socket(), address, port);
     }
     
     private static byte[] convert(int port) {
@@ -57,8 +75,8 @@ public class SocketHub extends Thread implements AutoCloseable {
     
     private static int convert(byte[] port) {
         synchronized (BUFFER) {
-            BUFFER.put(port);
-            return BUFFER.getInt();
+            BUFFER.put(0, port);
+            return BUFFER.getInt(0);
         }
     }
     
