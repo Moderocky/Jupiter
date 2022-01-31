@@ -1,9 +1,8 @@
 package mx.kenzie.jupiter.stream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 @SuppressWarnings("unused")
 public class InputStreamController extends InputStream implements StreamController {
@@ -16,6 +15,12 @@ public class InputStreamController extends InputStream implements StreamControll
     
     protected InputStreamController(InputStream stream) {
         this.stream = stream;
+    }
+    
+    public Iterable<String> lines() {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        final Iterator<String> iterator = new LazyLineIterator(reader);
+        return () -> iterator;
     }
     
     @Override
