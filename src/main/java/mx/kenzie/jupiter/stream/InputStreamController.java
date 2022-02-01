@@ -1,11 +1,15 @@
 package mx.kenzie.jupiter.stream;
 
+import mx.kenzie.jupiter.iterator.IterableInputStream;
+import mx.kenzie.jupiter.iterator.LazyIterator;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 @SuppressWarnings("unused")
-public class InputStreamController extends InputStream implements StreamController {
+public class InputStreamController extends InputStream implements StreamController, IterableInputStream {
     
     protected final InputStream stream;
     private final ByteBuffer converter = ByteBuffer.allocate(8);
@@ -92,6 +96,41 @@ public class InputStreamController extends InputStream implements StreamControll
             }
         }
         return count;
+    }
+    
+    @NotNull
+    @Override
+    public Iterator<Byte> iterator() {
+        return new ByteIterator();
+    }
+    
+    class ByteIterator implements LazyIterator<Byte> {
+        protected int next;
+        protected boolean read;
+        
+        @Override
+        public boolean hasNext() {
+            if (next == -1) return false;
+            this.next = this.readSafely();
+            this.read = true;
+            return next != -1;
+        }
+        
+        protected byte readSafely() {
+            try {
+                return (byte) stream.read();
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        }
+        
+        @Override
+        public Byte next() {
+            if (read) {
+                this.read = false;
+                return (byte) next;
+            } else return this.readSafely();
+        }
     }
     
 }

@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class StreamTest {
     
@@ -98,6 +99,18 @@ public class StreamTest {
             assert stream.read() == 20;
             assert stream.readLong() == 1000000;
         }
+    }
+    
+    @Test
+    public void loop() throws IOException {
+        final ByteArrayOutputStream target = new ByteArrayOutputStream();
+        final ByteArrayInputStream original = new ByteArrayInputStream("hello there".getBytes(StandardCharsets.UTF_8));
+        try (final InputStreamController stream = Stream.controller(original)) {
+            for (Byte b : stream) {
+                target.write(b);
+            }
+        }
+        assert target.toString(StandardCharsets.UTF_8).equals("hello there");
     }
     
 }

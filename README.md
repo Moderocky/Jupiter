@@ -18,7 +18,7 @@ A library for working with common Input/Output routes and providing better utili
 <dependency>
     <groupId>mx.kenzie</groupId>
     <artifactId>jupiter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
