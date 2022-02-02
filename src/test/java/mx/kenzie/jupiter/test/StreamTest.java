@@ -113,4 +113,34 @@ public class StreamTest {
         assert target.toString(StandardCharsets.UTF_8).equals("hello there");
     }
     
+    @Test
+    public void lines() {
+        final String test = """
+            hello :)
+            there :)
+            test""";
+        final ByteArrayInputStream original = new ByteArrayInputStream(test.getBytes(StandardCharsets.UTF_8));
+        int count = 0;
+        for (final String line : Stream.controller(original).lines()) {
+            assert line != null;
+            assert !line.isBlank();
+            count++;
+        }
+        assert count == 3;
+    }
+    
+    @Test
+    public void chars() {
+        final ByteArrayInputStream stream = new ByteArrayInputStream("hello there".getBytes(StandardCharsets.UTF_8));
+        int count = 0;
+        for (final Character c : Stream.controller(stream).chars()) {
+            count += c;
+        }
+        int check = 0;
+        for (final char c : "hello there".toCharArray()) {
+            check += c;
+        }
+        assert check == count;
+    }
+    
 }

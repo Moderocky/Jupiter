@@ -1,12 +1,13 @@
 package mx.kenzie.jupiter.stream;
 
+import mx.kenzie.jupiter.iterator.LazyIterator;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-class LazyLineIterator implements Iterator<String> {
+class LazyLineIterator implements LazyIterator<String> {
     
     protected final BufferedReader reader;
     protected String next;
