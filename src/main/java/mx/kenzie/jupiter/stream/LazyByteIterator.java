@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-class LazyByteIterator implements LazyIterator<Byte> {
+public class LazyByteIterator implements LazyIterator<Byte> {
     protected final InputStream stream;
     protected int next;
     protected boolean read;
     
-    LazyByteIterator(InputStream stream) {
+    public LazyByteIterator(InputStream stream) {
         this.stream = stream;
     }
     

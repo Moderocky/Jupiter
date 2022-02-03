@@ -18,7 +18,7 @@ A library for working with common Input/Output routes and providing better utili
 <dependency>
     <groupId>mx.kenzie</groupId>
     <artifactId>jupiter</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -30,6 +30,8 @@ These utilities include:
 1. Synchronization locks for streams (where multithreaded access would normally be dangerous)
 2. Stream controllers that can perform simple conversion tasks
 3. Forking, locking and wrapping streams with automatic resource disposal
+4. Lazy iteration of stream data to avoid messy while-loops
+5. Stream data directly in and out of heap memory
 
 There are also more advanced utilities for handling complex socket connections.
 
