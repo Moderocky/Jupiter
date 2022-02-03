@@ -6,12 +6,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-class LazyCharIterator implements LazyIterator<Character> {
+public class LazyCharIterator implements LazyIterator<Character> {
     protected final BufferedReader reader;
     protected int next;
     protected boolean read;
     
-    LazyCharIterator(BufferedReader reader) {
+    public LazyCharIterator(BufferedReader reader) {
         this.reader = reader;
     }
     

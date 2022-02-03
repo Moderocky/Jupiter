@@ -19,6 +19,7 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     protected long address;
     protected long length;
     protected long pointer;
+    protected long mark;
     
     public MemoryInputStream(Pointer pointer) {
         this(pointer.address(), pointer.length());
@@ -63,6 +64,21 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     @Override
     public void close() {
         this.unsafe.freeMemory(address);
+    }
+    
+    @Override
+    public synchronized void mark(int limit) {
+        this.mark = pointer;
+    }
+    
+    @Override
+    public synchronized void reset() {
+        this.pointer = mark;
+    }
+    
+    @Override
+    public boolean markSupported() {
+        return true;
     }
     
     @Override
