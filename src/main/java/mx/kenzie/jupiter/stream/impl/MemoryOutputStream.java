@@ -1,6 +1,6 @@
 package mx.kenzie.jupiter.stream.impl;
 
-import mx.kenzie.jupiter.memory.HeapPointer;
+import mx.kenzie.jupiter.memory.Pointer;
 import mx.kenzie.jupiter.stream.InternalAccess;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
@@ -29,11 +29,11 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
         this.resize = resize;
     }
     
-    public MemoryOutputStream(HeapPointer pointer) {
+    public MemoryOutputStream(Pointer pointer) {
         this(pointer, false);
     }
     
-    public MemoryOutputStream(HeapPointer pointer, boolean resize) {
+    public MemoryOutputStream(Pointer pointer, boolean resize) {
         this.address = pointer.address();
         this.length = pointer.length();
         this.resize = resize;
@@ -64,7 +64,7 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     
     @Override
     public void close() {
-    
+        // closing does not free the memory
     }
     
     protected boolean canWrite(int amount) {
@@ -74,6 +74,7 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     protected void resize(int amount) {
         if (!resize) throw new IllegalStateException("Unable to resize this address.");
         this.address = this.unsafe.reallocateMemory(address, pointer + amount);
+        this.length = length + amount;
     }
     
     public long getAddress() {
@@ -86,5 +87,9 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     
     public long getLength() {
         return length;
+    }
+    
+    protected long remaining() {
+        return length - pointer;
     }
 }

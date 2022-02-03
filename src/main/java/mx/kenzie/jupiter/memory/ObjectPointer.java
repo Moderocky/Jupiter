@@ -2,16 +2,19 @@ package mx.kenzie.jupiter.memory;
 
 import mx.kenzie.jupiter.stream.InternalAccess;
 
-public class HeapPointer
+public class ObjectPointer
     implements InternalAccess.AccessUnsafe, AutoCloseable, Pointer {
     
-    protected final long offset = this.getUnsafe().arrayBaseOffset(byte[].class);
-    protected byte[] handle;
-    protected int length;
+    protected final long offset;
+    protected Object handle;
+    protected long length;
     
-    protected HeapPointer(byte[] handle) {
-        this.handle = handle;
-        this.length = handle.length;
+    public ObjectPointer(Object object) {
+        this.handle = object;
+        this.length = this.getSize(object);
+        if (object.getClass().isArray())
+            this.offset = this.getUnsafe().arrayBaseOffset(object.getClass());
+        else this.offset = 12;
     }
     
     @Override

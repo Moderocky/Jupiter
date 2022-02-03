@@ -1,14 +1,16 @@
 package mx.kenzie.jupiter.stream.impl;
 
 import mx.kenzie.jupiter.iterator.IterableInputStream;
-import mx.kenzie.jupiter.memory.HeapPointer;
+import mx.kenzie.jupiter.memory.Pointer;
 import mx.kenzie.jupiter.stream.InternalAccess;
 import mx.kenzie.jupiter.stream.LazyByteIterator;
 import mx.kenzie.jupiter.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 public class MemoryInputStream extends InputStream implements InternalAccess.AccessUnsafe, Stream, IterableInputStream {
@@ -18,7 +20,7 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     protected long length;
     protected long pointer;
     
-    public MemoryInputStream(HeapPointer pointer) {
+    public MemoryInputStream(Pointer pointer) {
         this(pointer.address(), pointer.length());
     }
     
@@ -63,6 +65,18 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
         this.unsafe.freeMemory(address);
     }
     
+    @Override
+    public long transferTo(OutputStream out) throws IOException {
+        if (!(out instanceof MemoryOutputStream stream)) return super.transferTo(out);
+        final long source, target;
+        source = address + pointer;
+        target = stream.address + stream.pointer;
+        final long amount = Math.min(this.remaining(), stream.remaining());
+        this.unsafe.copyMemory(source, target, amount);
+        this.pointer = length; // skip rest
+        return amount;
+    }
+    
     protected long remaining() {
         return length - pointer;
     }
@@ -80,4 +94,5 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     public long getLength() {
         return length;
     }
+    
 }
