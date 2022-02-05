@@ -16,6 +16,15 @@ public class StreamReader extends Reader implements Iterable<Character> {
         this.reader = new BufferedReader(new InputStreamReader(stream));
     }
     
+    public String readUntil(char c) {
+        final StringBuilder builder = new StringBuilder();
+        for (final Character character : this) {
+            if (character == c) break;
+            builder.append(character);
+        }
+        return builder.toString();
+    }
+    
     @Override
     public int read(char @NotNull [] chars, int offset, int length) throws IOException {
         return reader.read(chars, offset, length);
