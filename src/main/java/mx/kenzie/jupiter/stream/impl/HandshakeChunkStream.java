@@ -39,6 +39,13 @@ public class HandshakeChunkStream<Element> extends ChunkStream<Element> {
     }
     
     @Override
+    public Element[] readAllRemaining(Element[] array) {
+        final List<Element> list = new ArrayList<>();
+        while (!this.isClosed()) list.add(this.read());
+        return list.toArray(array);
+    }
+    
+    @Override
     public Element read() {
         boolean read;
         synchronized (this) {
@@ -59,13 +66,6 @@ public class HandshakeChunkStream<Element> extends ChunkStream<Element> {
             lock.notify();
         }
         return element;
-    }
-    
-    @Override
-    public Element[] readAllRemaining(Element[] array) {
-        final List<Element> list = new ArrayList<>();
-        while (!this.isClosed()) list.add(this.read());
-        return list.toArray(array);
     }
     
     @Override
