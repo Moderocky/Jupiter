@@ -49,6 +49,15 @@ public final class InternalAccess {
         return (UNSAFE.getInt(objects, offset) & 0xFFFFFFFFL) * 8;
     }
     
+    private static Object getObject(long address) {
+        final Object[] objects = new Object[1];
+        final int offset = UNSAFE.arrayBaseOffset(objects.getClass());
+        final int scale = UNSAFE.arrayIndexScale(objects.getClass());
+        assert scale == 4;
+        UNSAFE.putInt(objects, offset, (int) (address / 8));
+        return objects[0];
+    }
+    
     public interface AccessUnsafe {
         
         static long allocate(long length) {
@@ -61,6 +70,10 @@ public final class InternalAccess {
         
         default long getAddress(Object object) {
             return InternalAccess.getAddress(object);
+        }
+        
+        default Object getObject(long address) {
+            return InternalAccess.getObject(address);
         }
         
         default long getSize(Object object) {
