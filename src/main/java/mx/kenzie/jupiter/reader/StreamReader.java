@@ -62,7 +62,6 @@ public class StreamReader extends Reader implements Iterable<Character> {
             else if (c >= 65 && c <= 90) builder.append(c);
             else if (c >= 48 && c <= 57) builder.append(c);
             else if (c == 95) builder.append(c);
-            else if (c == 36) builder.append(c);
             else {
                 this.reset();
                 break;
