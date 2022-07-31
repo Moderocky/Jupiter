@@ -38,18 +38,27 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     
     @Override
     public int read(byte @NotNull [] bytes) {
+        if (pointer >= length) return -1;
         final int amount = (int) Math.min(bytes.length, this.remaining());
         final long target = this.getAddress(bytes) + unsafe.arrayBaseOffset(byte[].class);
         this.unsafe.copyMemory(address + pointer, target, amount);
+        pointer += amount;
         return amount;
     }
     
     @Override
     public int read(byte @NotNull [] bytes, int offset, int length) {
-        final int amount = (int) Math.min(length, this.remaining());
-        final long target = this.getAddress(bytes) + unsafe.arrayBaseOffset(byte[].class) + offset;
-        this.unsafe.copyMemory(address + pointer, target, amount);
-        return amount;
+        if (pointer >= this.length) return -1;
+        final int amount = (int) Math.min(bytes.length - offset, this.remaining());
+        final long target = this.getAddress(bytes) + unsafe.arrayBaseOffset(byte[].class);
+        this.unsafe.copyMemory(address + pointer, target + offset, amount);
+        this.pointer += amount;
+        return (amount);
+    }
+    
+    @Override
+    public int available() throws IOException {
+        return (int) this.remaining();
     }
     
     @Override
@@ -63,7 +72,7 @@ public class MemoryInputStream extends InputStream implements InternalAccess.Acc
     
     @Override
     public void close() {
-        this.unsafe.freeMemory(address);
+//        this.unsafe.freeMemory(address);
     }
     
     @Override

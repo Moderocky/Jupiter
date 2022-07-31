@@ -70,6 +70,8 @@ public class MemoryStreamTest implements InternalAccess.AccessUnsafe {
         assert stream.getLength() != 8;
         stream.write("hello there".getBytes(StandardCharsets.UTF_8));
         assert stream.getLength() == 30;
+        stream.freeMemory();
+        stream.close();
     }
     
     @Test

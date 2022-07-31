@@ -9,12 +9,12 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     
     protected final Unsafe unsafe = this.getUnsafe();
     protected long address;
-    protected long length;
+    protected long length, initial;
     protected long pointer;
     protected boolean resize;
     
     public MemoryOutputStream() {
-        this.length = 16;
+        this.length = initial = 16;
         this.address = unsafe.allocateMemory(length);
         this.resize = true;
     }
@@ -24,7 +24,7 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     }
     
     public MemoryOutputStream(long length, boolean resize) {
-        this.length = length;
+        this.length = initial = length;
         this.address = unsafe.allocateMemory(length);
         this.resize = resize;
     }
@@ -41,7 +41,7 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     
     @Override
     public void write(int b) {
-        if (pointer >= length) this.resize(16);
+        if (pointer >= length) this.resize((int) initial);
         final byte bi = (byte) b;
         this.unsafe.putByte(address + pointer++, bi);
     }
@@ -73,8 +73,16 @@ public class MemoryOutputStream extends NoThrowsOutputStream implements Internal
     
     protected void resize(int amount) {
         if (!resize) throw new IllegalStateException("Unable to resize this address.");
-        this.address = this.unsafe.reallocateMemory(address, pointer + amount);
+        this.address = this.unsafe.reallocateMemory(address, length + amount);
         this.length = length + amount;
+    }
+    
+    public MemoryInputStream createInputStream() {
+        return new MemoryInputStream(address, pointer);
+    }
+    
+    public void freeMemory() {
+        this.unsafe.freeMemory(address);
     }
     
     public long getAddress() {
